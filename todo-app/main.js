@@ -1,32 +1,67 @@
-const electron = require("electron");
-const { app, BrowserWindow } = require("electron");
+const path = require('path')
+const { app, ipcMain } = require('electron')
 
-// Function that will create a desktop window with custom size preferences that will load the HTML file.
-function createWindow() {
-  const win = new BrowserWindow({
-    width: 800,
-    height: 500,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-  });
+const Window = require('./Window')
+const DataStore = require('./dataStore')
 
-  win.loadFile("index.html");
+require('electron-reload')(__dirname)
+
+// create a new todo store name "Todos Main"
+const todosData = new DataStore({ name: 'Todos Main' })
+
+function main () {
+  // todo list window
+  let mainWindow = new Window({
+    file: path.join('renderer', 'index.html')
+  })
+
+  // add todo window
+  let addTodoWin
+
+  // TODO: put these events into their own file
+
+  // initialize with todos
+  mainWindow.once('show', () => {
+    mainWindow.webContents.send('todos', todosData.todos)
+  })
+
+  // create add todo window
+  ipcMain.on('add-todo-window', () => {
+    // if addTodoWin does not already exist
+    if (!addTodoWin) {
+      // create a new add todo window
+      addTodoWin = new Window({
+        file: path.join('renderer', 'add.html'),
+        width: 400,
+        height: 400,
+        // close with the main window
+        parent: mainWindow
+      })
+
+      // cleanup
+      addTodoWin.on('closed', () => {
+        addTodoWin = null
+      })
+    }
+  })
+
+  // add-todo from add todo window
+  ipcMain.on('add-todo', (event, todo) => {
+    const updatedTodos = todosData.addTodo(todo).todos
+
+    mainWindow.send('todos', updatedTodos)
+  })
+
+  // delete-todo from todo list window
+  ipcMain.on('delete-todo', (event, todo) => {
+    const updatedTodos = todosData.deleteTodo(todo).todos
+
+    mainWindow.send('todos', updatedTodos)
+  })
 }
 
-// Since some APIs in the back-end takes time to load so we need to make our app smart that only creates windows after every API is loaded and all the events occurred including asynchronous functions.
-app.whenReady().then(createWindow);
+app.on('ready', main)
 
-// Good practice to quit an app and kill the process if the window is closed by the user.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-// Since it is common on macOS to re-create a window in the app when the dock icon is clicked and there are no windows open.
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
+app.on('window-all-closed', function () {
+  app.quit()
+})
