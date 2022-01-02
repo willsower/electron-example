@@ -1,1 +1,5 @@
-# electron-example
+# TODO App
+
+`npm install`
+
+`npm start`
