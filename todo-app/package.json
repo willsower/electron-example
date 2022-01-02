@@ -1,0 +1,23 @@
+{
+  "name": "electron-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/willsower/electron-example.git"
+  },
+  "author": "Taichen Rose",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/willsower/electron-example/issues"
+  },
+  "homepage": "https://github.com/willsower/electron-example#readme",
+  "dependencies": {
+    "electron": "^16.0.5"
+  }
+}
