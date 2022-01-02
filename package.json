@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/willsower/electron-example/issues"
   },
-  "homepage": "https://github.com/willsower/electron-example#readme"
+  "homepage": "https://github.com/willsower/electron-example#readme",
+  "dependencies": {
+    "electron": "^16.0.5"
+  }
 }
